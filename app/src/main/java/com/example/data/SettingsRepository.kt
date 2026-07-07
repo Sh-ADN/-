@@ -18,7 +18,8 @@ class SettingsRepository(private val context: Context) {
     }
 
     val webAppUrlFlow: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[WEB_APP_URL] ?: ""
+        val saved = preferences[WEB_APP_URL]
+        if (saved.isNullOrEmpty()) "https://script.google.com/macros/s/AKfycbzTDiNJh4LEaIah19SVFaf6JlESbW5tf2ElwaMULTDENIAlXFOFI4QAXEmV1nYwrVdA/exec" else saved
     }
 
     val academicYearFlow: Flow<String> = context.dataStore.data.map { preferences ->

@@ -27,7 +27,7 @@ class ClassRollViewModel(application: Application) : AndroidViewModel(applicatio
     private val settingsRepo = SettingsRepository(application)
     val repository = ClassRollRepository(db.classRollDao(), NetworkModule.apiService, settingsRepo)
 
-    val webAppUrl = settingsRepo.webAppUrlFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+    val webAppUrl = settingsRepo.webAppUrlFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "https://script.google.com/macros/s/AKfycbzTDiNJh4LEaIah19SVFaf6JlESbW5tf2ElwaMULTDENIAlXFOFI4QAXEmV1nYwrVdA/exec")
     val currentYear = settingsRepo.academicYearFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     private val _availableYears = MutableStateFlow<List<String>>(emptyList())

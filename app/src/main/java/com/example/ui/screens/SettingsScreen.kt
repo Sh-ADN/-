@@ -15,19 +15,10 @@ fun SettingsScreen(viewModel: ClassRollViewModel) {
     val currentYear by viewModel.currentYear.collectAsStateWithLifecycle()
     val availableYears by viewModel.availableYears.collectAsStateWithLifecycle()
     
-    var urlInput by remember(webAppUrl) { mutableStateOf(webAppUrl) }
     var yearInput by remember(currentYear) { mutableStateOf(currentYear) }
     var expanded by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        OutlinedTextField(
-            value = urlInput,
-            onValueChange = { urlInput = it },
-            label = { Text("Web App URL") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = it },
@@ -57,11 +48,11 @@ fun SettingsScreen(viewModel: ClassRollViewModel) {
         
         Spacer(modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(onClick = { viewModel.updateSettings(urlInput, yearInput) }) {
+            Button(onClick = { viewModel.updateSettings(webAppUrl, yearInput) }) {
                 Text("Save Settings")
             }
             Button(onClick = { 
-                viewModel.updateSettings(urlInput, yearInput)
+                viewModel.updateSettings(webAppUrl, yearInput)
                 viewModel.fetchYears() 
             }) {
                 Text("Fetch Years")
