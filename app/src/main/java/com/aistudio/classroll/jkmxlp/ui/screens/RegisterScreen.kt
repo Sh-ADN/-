@@ -1,4 +1,4 @@
-package com.example.ui.screens
+package com.aistudio.classroll.jkmxlp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,8 +16,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.data.AttendanceRecordEntity
-import com.example.ui.ClassRollViewModel
+import com.aistudio.classroll.jkmxlp.data.AttendanceRecordEntity
+import com.aistudio.classroll.jkmxlp.ui.ClassRollViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date

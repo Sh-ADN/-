@@ -1,4 +1,4 @@
-package com.example.data
+package com.aistudio.classroll.jkmxlp.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore

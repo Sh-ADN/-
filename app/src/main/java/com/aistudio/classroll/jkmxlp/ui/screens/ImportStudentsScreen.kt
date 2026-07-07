@@ -1,4 +1,4 @@
-package com.example.ui.screens
+package com.aistudio.classroll.jkmxlp.ui.screens
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.data.RemoteStudent
-import com.example.ui.ClassRollViewModel
+import com.aistudio.classroll.jkmxlp.data.RemoteStudent
+import com.aistudio.classroll.jkmxlp.ui.ClassRollViewModel
 import java.io.BufferedReader
 import java.io.InputStreamReader
 

@@ -1,4 +1,4 @@
-package com.example.data
+package com.aistudio.classroll.jkmxlp.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

@@ -1,4 +1,4 @@
-package com.example.ui.screens
+package com.aistudio.classroll.jkmxlp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,8 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.data.AttendanceRecordEntity
-import com.example.ui.ClassRollViewModel
+import com.aistudio.classroll.jkmxlp.data.AttendanceRecordEntity
+import com.aistudio.classroll.jkmxlp.data.StudentEntity
+import com.aistudio.classroll.jkmxlp.ui.ClassRollViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -66,61 +67,13 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
         Spacer(Modifier.height(32.dp))
         
         key(currentStudent.roll) {
-            val dismissState = rememberSwipeToDismissBoxState(
-                confirmValueChange = { dismissValue ->
-                    when (dismissValue) {
-                        SwipeToDismissBoxValue.StartToEnd -> {
-                            records.add(AttendanceRecordEntity(currentYear, date, currentStudent.roll, "P", false))
-                            currentIndex++
-                            true
-                        }
-                        SwipeToDismissBoxValue.EndToStart -> {
-                            records.add(AttendanceRecordEntity(currentYear, date, currentStudent.roll, "A", false))
-                            currentIndex++
-                            true
-                        }
-                        else -> false
-                    }
+            SwipeableStudentCard(
+                student = currentStudent,
+                onSwiped = { status ->
+                    records.add(AttendanceRecordEntity(currentYear, date, currentStudent.roll, status, false))
+                    currentIndex++
                 }
             )
-
-            SwipeToDismissBox(
-                state = dismissState,
-                backgroundContent = {
-                    val color = when (dismissState.targetValue) {
-                        SwipeToDismissBoxValue.StartToEnd -> Color(0xFF4CAF50)
-                        SwipeToDismissBoxValue.EndToStart -> Color(0xFFF44336)
-                        else -> Color.LightGray
-                    }
-                    val alignment = when (dismissState.targetValue) {
-                        SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                        else -> Alignment.Center
-                    }
-                    Box(Modifier.fillMaxSize().background(color, MaterialTheme.shapes.large).padding(24.dp), contentAlignment = alignment) {
-                        Text(
-                            when (dismissState.targetValue) {
-                                SwipeToDismissBoxValue.StartToEnd -> "PRESENT"
-                                SwipeToDismissBoxValue.EndToStart -> "ABSENT"
-                                else -> ""
-                            },
-                            color = Color.White,
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    }
-                }
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth().height(400.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                ) {
-                    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(currentStudent.roll, style = MaterialTheme.typography.displayLarge)
-                        Spacer(Modifier.height(24.dp))
-                        Text(currentStudent.name, style = MaterialTheme.typography.headlineMedium)
-                    }
-                }
-            }
         }
         
         Spacer(Modifier.height(32.dp))
@@ -142,6 +95,66 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
             ) {
                 Text("Present")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeableStudentCard(
+    student: StudentEntity,
+    onSwiped: (String) -> Unit
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { dismissValue ->
+            when (dismissValue) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    onSwiped("P")
+                    true
+                }
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onSwiped("A")
+                    true
+                }
+                else -> false
+            }
+        }
+    )
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            val color = when (dismissState.targetValue) {
+                SwipeToDismissBoxValue.StartToEnd -> Color(0xFF4CAF50)
+                SwipeToDismissBoxValue.EndToStart -> Color(0xFFF44336)
+                else -> Color.LightGray
+            }
+            val alignment = when (dismissState.targetValue) {
+                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                else -> Alignment.Center
+            }
+            Box(Modifier.fillMaxSize().background(color, MaterialTheme.shapes.large).padding(24.dp), contentAlignment = alignment) {
+                Text(
+                    when (dismissState.targetValue) {
+                        SwipeToDismissBoxValue.StartToEnd -> "PRESENT"
+                        SwipeToDismissBoxValue.EndToStart -> "ABSENT"
+                        else -> ""
+                    },
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
+        }
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth().height(400.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(student.roll, style = MaterialTheme.typography.displayLarge)
+                Spacer(Modifier.height(24.dp))
+                Text(student.name, style = MaterialTheme.typography.headlineMedium)
             }
         }
     }

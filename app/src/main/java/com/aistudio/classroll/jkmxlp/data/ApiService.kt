@@ -1,4 +1,4 @@
-package com.example.data
+package com.aistudio.classroll.jkmxlp.data
 
 import retrofit2.http.Body
 import retrofit2.http.GET

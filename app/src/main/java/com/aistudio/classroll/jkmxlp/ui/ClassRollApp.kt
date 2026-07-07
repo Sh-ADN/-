@@ -1,4 +1,4 @@
-package com.example.ui
+package com.aistudio.classroll.jkmxlp.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -10,7 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.ui.screens.*
+import com.aistudio.classroll.jkmxlp.ui.screens.*
 
 @Composable
 fun ClassRollApp(viewModel: ClassRollViewModel) {

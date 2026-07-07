@@ -1,4 +1,4 @@
-package com.example.ui.screens
+package com.aistudio.classroll.jkmxlp.ui.screens
 
 object Routes {
     const val Home = "home"

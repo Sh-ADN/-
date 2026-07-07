@@ -1,16 +1,16 @@
-package com.example.ui
+package com.aistudio.classroll.jkmxlp.ui
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
-import com.example.data.AppDatabase
-import com.example.data.AttendanceRecordEntity
-import com.example.data.ClassRollRepository
-import com.example.data.NetworkModule
-import com.example.data.RemoteStudent
-import com.example.data.SettingsRepository
-import com.example.data.StudentEntity
+import com.aistudio.classroll.jkmxlp.data.AppDatabase
+import com.aistudio.classroll.jkmxlp.data.AttendanceRecordEntity
+import com.aistudio.classroll.jkmxlp.data.ClassRollRepository
+import com.aistudio.classroll.jkmxlp.data.NetworkModule
+import com.aistudio.classroll.jkmxlp.data.RemoteStudent
+import com.aistudio.classroll.jkmxlp.data.SettingsRepository
+import com.aistudio.classroll.jkmxlp.data.StudentEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

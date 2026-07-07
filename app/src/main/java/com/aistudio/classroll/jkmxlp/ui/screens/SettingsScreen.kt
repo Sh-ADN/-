@@ -1,4 +1,4 @@
-package com.example.ui.screens
+package com.aistudio.classroll.jkmxlp.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -6,7 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.ui.ClassRollViewModel
+import com.aistudio.classroll.jkmxlp.ui.ClassRollViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
