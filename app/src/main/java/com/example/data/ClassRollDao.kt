@@ -1,0 +1,31 @@
+package com.example.data
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface ClassRollDao {
+    @Query("SELECT * FROM students WHERE year = :year AND active = 1 ORDER BY roll ASC")
+    fun getStudentsForYear(year: String): Flow<List<StudentEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertStudents(students: List<StudentEntity>)
+
+    @Query("SELECT * FROM attendance_records WHERE year = :year AND date = :date")
+    fun getAttendanceForDate(year: String, date: String): Flow<List<AttendanceRecordEntity>>
+
+    @Query("SELECT * FROM attendance_records WHERE year = :year AND date LIKE :monthPrefix || '%'")
+    fun getAttendanceForMonth(year: String, monthPrefix: String): Flow<List<AttendanceRecordEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAttendanceRecords(records: List<AttendanceRecordEntity>)
+
+    @Query("SELECT * FROM attendance_records WHERE isSynced = 0")
+    suspend fun getUnsyncedRecords(): List<AttendanceRecordEntity>
+
+    @Query("UPDATE attendance_records SET isSynced = 1 WHERE year = :year AND date = :date AND roll = :roll")
+    suspend fun markSynced(year: String, date: String, roll: String)
+}
