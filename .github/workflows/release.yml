@@ -24,12 +24,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
 
-      # Debug build needs no signing setup at all — it's signed
-      # automatically with a throwaway debug key, which is fine
-      # for installing on your own phone.
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
 
