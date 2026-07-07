@@ -11,7 +11,6 @@ import com.example.ui.ClassRollViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: ClassRollViewModel) {
-    val webAppUrl by viewModel.webAppUrl.collectAsStateWithLifecycle()
     val currentYear by viewModel.currentYear.collectAsStateWithLifecycle()
     val availableYears by viewModel.availableYears.collectAsStateWithLifecycle()
     
@@ -48,11 +47,11 @@ fun SettingsScreen(viewModel: ClassRollViewModel) {
         
         Spacer(modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(onClick = { viewModel.updateSettings(webAppUrl, yearInput) }) {
+            Button(onClick = { viewModel.updateSettings(yearInput) }) {
                 Text("Save Settings")
             }
             Button(onClick = { 
-                viewModel.updateSettings(webAppUrl, yearInput)
+                viewModel.updateSettings(yearInput)
                 viewModel.fetchYears() 
             }) {
                 Text("Fetch Years")

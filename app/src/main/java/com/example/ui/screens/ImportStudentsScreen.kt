@@ -72,9 +72,9 @@ fun ImportStudentsScreen(viewModel: ClassRollViewModel) {
             Button(
                 onClick = { 
                     statusMessage = "Importing..."
-                    viewModel.importStudents(currentYear, previewStudents) { success ->
-                        statusMessage = if (success) "Import successful!" else "Import failed."
-                    }
+                        viewModel.importStudents(currentYear, previewStudents) { result ->
+                            statusMessage = if (result == "Success") "Import successful!" else "Import failed: $result"
+                        }
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 enabled = currentYear.isNotBlank()

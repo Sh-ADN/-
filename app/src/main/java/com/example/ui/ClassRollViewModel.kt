@@ -36,9 +36,8 @@ class ClassRollViewModel(application: Application) : AndroidViewModel(applicatio
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing = _isSyncing.asStateFlow()
 
-    fun updateSettings(url: String, year: String) {
+    fun updateSettings(year: String) {
         viewModelScope.launch {
-            settingsRepo.updateWebAppUrl(url)
             settingsRepo.updateAcademicYear(year)
         }
     }
@@ -62,12 +61,12 @@ class ClassRollViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun importStudents(year: String, students: List<RemoteStudent>, onResult: (Boolean) -> Unit) {
+    fun importStudents(year: String, students: List<RemoteStudent>, onResult: (String) -> Unit) {
         viewModelScope.launch {
             _isSyncing.value = true
-            val success = repository.importStudents(year, students)
+            val result = repository.importStudents(year, students)
             _isSyncing.value = false
-            onResult(success)
+            onResult(result)
         }
     }
 

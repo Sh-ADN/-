@@ -23,7 +23,7 @@ class ClassRollRepository(
     // Sync Students from Server
     suspend fun syncStudents() {
         val url = settingsRepo.webAppUrlFlow.first()
-        val token = com.example.BuildConfig.APPS_SCRIPT_TOKEN
+        val token = settingsRepo.appsScriptTokenFlow.first()
         val year = settingsRepo.academicYearFlow.first()
         if (url.isBlank() || token.isBlank() || year.isBlank()) return
 
@@ -39,11 +39,10 @@ class ClassRollRepository(
         }
     }
 
-    // Import Students via CSV (Parsed in UI, sent to Repo)
-    suspend fun importStudents(year: String, students: List<RemoteStudent>): Boolean {
+    suspend fun importStudents(year: String, students: List<RemoteStudent>): String {
         val url = settingsRepo.webAppUrlFlow.first()
-        val token = com.example.BuildConfig.APPS_SCRIPT_TOKEN
-        if (url.isBlank() || token.isBlank()) return false
+        val token = settingsRepo.appsScriptTokenFlow.first()
+        if (url.isBlank() || token.isBlank()) return "URL or token is blank"
 
         return try {
             val request = ImportStudentsRequest(token = token, year = year, students = students)
@@ -54,13 +53,13 @@ class ClassRollRepository(
                     StudentEntity(year = year, roll = it.roll, name = it.name, active = it.active)
                 }
                 dao.insertStudents(entities)
-                true
+                "Success"
             } else {
-                false
+                "API Error"
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            false
+            e.message ?: "Unknown error"
         }
     }
 
@@ -70,7 +69,7 @@ class ClassRollRepository(
         dao.insertAttendanceRecords(records)
 
         val url = settingsRepo.webAppUrlFlow.first()
-        val token = com.example.BuildConfig.APPS_SCRIPT_TOKEN
+        val token = settingsRepo.appsScriptTokenFlow.first()
         if (url.isBlank() || token.isBlank()) return false
 
         val remoteRecords = records.map { RemoteAttendanceRecord(roll = it.roll, status = it.status) }
@@ -97,7 +96,7 @@ class ClassRollRepository(
         dao.insertAttendanceRecords(listOf(AttendanceRecordEntity(year, date, roll, status, isSynced = false)))
 
         val url = settingsRepo.webAppUrlFlow.first()
-        val token = com.example.BuildConfig.APPS_SCRIPT_TOKEN
+        val token = settingsRepo.appsScriptTokenFlow.first()
         if (url.isBlank() || token.isBlank()) return false
 
         val request = UpdateCellRequest(token = token, year = year, date = date, roll = roll, status = status)
@@ -117,7 +116,7 @@ class ClassRollRepository(
     
     suspend fun fetchYears(): List<String> {
         val url = settingsRepo.webAppUrlFlow.first()
-        val token = com.example.BuildConfig.APPS_SCRIPT_TOKEN
+        val token = settingsRepo.appsScriptTokenFlow.first()
         if (url.isBlank() || token.isBlank()) return emptyList()
         return try {
             api.getYears(url, token = token).years
