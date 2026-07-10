@@ -22,6 +22,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import kotlinx.coroutines.flow.flatMapLatest
+
 class ClassRollViewModel(application: Application) : AndroidViewModel(application) {
     private val db = Room.databaseBuilder(application, AppDatabase::class.java, "classroll_db").build()
     private val settingsRepo = SettingsRepository(application)
@@ -87,10 +89,12 @@ class ClassRollViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
     
-    fun getStudents(): StateFlow<List<StudentEntity>> {
-        val year = currentYear.value
-        return repository.getStudentsForYear(year).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-    }
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val students: StateFlow<List<StudentEntity>> = currentYear
+        .flatMapLatest { year ->
+            repository.getStudentsForYear(year)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     
     fun getAttendanceForDate(date: String): StateFlow<List<AttendanceRecordEntity>> {
         val year = currentYear.value

@@ -19,7 +19,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: ClassRollViewModel) {
-    val students by viewModel.getStudents().collectAsStateWithLifecycle()
+    val students by viewModel.students.collectAsStateWithLifecycle()
     val currentYear by viewModel.currentYear.collectAsStateWithLifecycle()
     var currentIndex by remember { mutableStateOf(0) }
     val records = remember { mutableStateListOf<AttendanceRecordEntity>() }
@@ -61,8 +61,24 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
     val currentStudent = students[currentIndex]
     
     Column(Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Attendance for $date", style = MaterialTheme.typography.titleLarge)
-        Text("${currentIndex + 1} / ${students.size}", style = MaterialTheme.typography.bodyLarge)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text("Attendance for $date", style = MaterialTheme.typography.titleLarge)
+                Text("${currentIndex + 1} / ${students.size}", style = MaterialTheme.typography.bodyLarge)
+            }
+            if (currentIndex > 0) {
+                TextButton(onClick = {
+                    currentIndex--
+                    records.removeLast()
+                }) {
+                    Text("Undo")
+                }
+            }
+        }
         
         Spacer(Modifier.height(32.dp))
         
@@ -72,31 +88,12 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
                 onSwiped = { status ->
                     records.add(AttendanceRecordEntity(currentYear, date, currentStudent.roll, status, false))
                     currentIndex++
-                }
+                },
+                modifier = Modifier.weight(1f)
             )
         }
         
-        Spacer(Modifier.height(32.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            Button(
-                onClick = {
-                    records.add(AttendanceRecordEntity(currentYear, date, currentStudent.roll, "A", false))
-                    currentIndex++
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336))
-            ) {
-                Text("Absent")
-            }
-            Button(
-                onClick = {
-                    records.add(AttendanceRecordEntity(currentYear, date, currentStudent.roll, "P", false))
-                    currentIndex++
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
-            ) {
-                Text("Present")
-            }
-        }
+        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -104,25 +101,26 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
 @Composable
 private fun SwipeableStudentCard(
     student: StudentEntity,
-    onSwiped: (String) -> Unit
+    onSwiped: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
-            when (dismissValue) {
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    onSwiped("P")
-                    true
-                }
-                SwipeToDismissBoxValue.EndToStart -> {
-                    onSwiped("A")
-                    true
-                }
-                else -> false
-            }
+            dismissValue != SwipeToDismissBoxValue.Settled
         }
     )
+
+    LaunchedEffect(dismissState.currentValue) {
+        when (dismissState.currentValue) {
+            SwipeToDismissBoxValue.StartToEnd -> onSwiped("P")
+            SwipeToDismissBoxValue.EndToStart -> onSwiped("A")
+            else -> {}
+        }
+    }
+
     SwipeToDismissBox(
         state = dismissState,
+        modifier = modifier,
         backgroundContent = {
             val color = when (dismissState.targetValue) {
                 SwipeToDismissBoxValue.StartToEnd -> Color(0xFF4CAF50)
@@ -148,7 +146,7 @@ private fun SwipeableStudentCard(
         }
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth().height(400.dp),
+            modifier = Modifier.fillMaxSize(),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {

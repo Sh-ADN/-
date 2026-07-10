@@ -25,11 +25,13 @@ import java.util.Locale
 
 @Composable
 fun RegisterScreen(viewModel: ClassRollViewModel) {
-    val students by viewModel.getStudents().collectAsStateWithLifecycle()
-    val monthFormat = SimpleDateFormat("yyyy-MM", Locale.US)
-    val currentMonthStr = monthFormat.format(Date())
+    val students by viewModel.students.collectAsStateWithLifecycle()
+    val currentYear by viewModel.currentYear.collectAsStateWithLifecycle()
+    val monthFormat = remember { SimpleDateFormat("yyyy-MM", Locale.US) }
+    val currentMonthStr = remember { monthFormat.format(Date()) }
     
-    val attendanceRecords by viewModel.getAttendanceForMonth(currentMonthStr).collectAsStateWithLifecycle()
+    val attendanceRecordsFlow = remember(currentMonthStr, currentYear) { viewModel.getAttendanceForMonth(currentMonthStr) }
+    val attendanceRecords by attendanceRecordsFlow.collectAsStateWithLifecycle()
     
     if (students.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

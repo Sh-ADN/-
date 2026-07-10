@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ClassRollDao {
-    @Query("SELECT * FROM students WHERE year = :year AND active = 1 ORDER BY roll ASC")
+    @Query("SELECT * FROM students WHERE year = :year AND active = 1 ORDER BY CAST(roll AS INTEGER) ASC")
     fun getStudentsForYear(year: String): Flow<List<StudentEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
