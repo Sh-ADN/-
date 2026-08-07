@@ -5,4 +5,5 @@ object Routes {
     const val Register = "register"
     const val ImportStudents = "import_students"
     const val Settings = "settings"
+    const val Summary = "summary"
 }

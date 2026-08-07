@@ -105,4 +105,10 @@ class ClassRollViewModel(application: Application) : AndroidViewModel(applicatio
         val year = currentYear.value
         return repository.getAttendanceForMonth(year, monthPrefix).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
+
+    val allAttendanceForYear: StateFlow<List<AttendanceRecordEntity>> = currentYear
+        .flatMapLatest { year ->
+            repository.getAllAttendanceForYear(year)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 }

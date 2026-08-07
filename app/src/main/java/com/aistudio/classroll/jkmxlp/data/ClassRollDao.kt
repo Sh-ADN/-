@@ -20,6 +20,9 @@ interface ClassRollDao {
     @Query("SELECT * FROM attendance_records WHERE year = :year AND date LIKE :monthPrefix || '%'")
     fun getAttendanceForMonth(year: String, monthPrefix: String): Flow<List<AttendanceRecordEntity>>
 
+    @Query("SELECT * FROM attendance_records WHERE year = :year")
+    fun getAllAttendanceForYear(year: String): Flow<List<AttendanceRecordEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAttendanceRecords(records: List<AttendanceRecordEntity>)
 

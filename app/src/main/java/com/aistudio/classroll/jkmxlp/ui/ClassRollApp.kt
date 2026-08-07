@@ -34,6 +34,12 @@ fun ClassRollApp(viewModel: ClassRollViewModel) {
                     label = { Text("Register") }
                 )
                 NavigationBarItem(
+                    selected = currentRoute == Routes.Summary,
+                    onClick = { navController.navigate(Routes.Summary) },
+                    icon = { Icon(Icons.Default.BarChart, "Summary") },
+                    label = { Text("Summary") }
+                )
+                NavigationBarItem(
                     selected = currentRoute == Routes.ImportStudents,
                     onClick = { navController.navigate(Routes.ImportStudents) },
                     icon = { Icon(Icons.Default.UploadFile, "Import") },
@@ -51,6 +57,7 @@ fun ClassRollApp(viewModel: ClassRollViewModel) {
         NavHost(navController, startDestination = Routes.Home, Modifier.padding(innerPadding)) {
             composable(Routes.Home) { HomeScreen(viewModel) }
             composable(Routes.Register) { RegisterScreen(viewModel) }
+            composable(Routes.Summary) { SummaryDashboardScreen(viewModel) }
             composable(Routes.ImportStudents) { ImportStudentsScreen(viewModel) }
             composable(Routes.Settings) { SettingsScreen(viewModel) }
         }
