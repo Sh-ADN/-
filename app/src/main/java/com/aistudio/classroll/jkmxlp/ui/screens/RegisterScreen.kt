@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -202,21 +202,21 @@ fun RegisterScreen(viewModel: ClassRollViewModel) {
                     cal.add(Calendar.MONTH, -1)
                     selectedCalendar = cal
                 }) {
-                    Icon(Icons.Default.ChevronLeft, contentDescription = "Previous Month")
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Previous Month")
                 }
 
                 Text("Register: $selectedMonthTitle", style = MaterialTheme.typography.titleLarge)
 
                 Row {
                     IconButton(onClick = { showCsvExportDialog = true }) {
-                        Icon(Icons.Default.Download, contentDescription = "Export CSV")
+                        Icon(Icons.Default.Share, contentDescription = "Export CSV")
                     }
                     IconButton(onClick = {
                         val cal = selectedCalendar.clone() as Calendar
                         cal.add(Calendar.MONTH, 1)
                         selectedCalendar = cal
                     }) {
-                        Icon(Icons.Default.ChevronRight, contentDescription = "Next Month")
+                        Icon(Icons.Default.ArrowForward, contentDescription = "Next Month")
                     }
                 }
             }

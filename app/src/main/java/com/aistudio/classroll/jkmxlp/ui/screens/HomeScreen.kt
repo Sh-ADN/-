@@ -91,7 +91,7 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
                 Spacer(Modifier.height(16.dp))
                 OutlinedButton(onClick = {
                     if (currentIndex > 0) currentIndex--
-                    if (records.isNotEmpty()) records.removeLast()
+                    if (records.isNotEmpty()) records.removeAt(records.size - 1)
                     submissionMessage = ""
                 }) {
                     Text("Undo Last")
@@ -126,7 +126,7 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
             if (currentIndex > 0) {
                 TextButton(onClick = {
                     if (currentIndex > 0) currentIndex--
-                    if (records.isNotEmpty()) records.removeLast()
+                    if (records.isNotEmpty()) records.removeAt(records.size - 1)
                 }) {
                     Text("Undo")
                 }

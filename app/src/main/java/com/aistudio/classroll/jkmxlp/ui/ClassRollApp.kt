@@ -34,25 +34,25 @@ fun ClassRollApp(viewModel: ClassRollViewModel) {
                 NavigationBarItem(
                     selected = currentRoute == Routes.Home,
                     onClick = { navigateTo(Routes.Home) },
-                    icon = { Icon(Icons.Default.Checklist, "Take Attendance") },
+                    icon = { Icon(Icons.Default.Done, "Take Attendance") },
                     label = { Text("Home") }
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Register,
                     onClick = { navigateTo(Routes.Register) },
-                    icon = { Icon(Icons.Default.GridOn, "Register") },
+                    icon = { Icon(Icons.Default.List, "Register") },
                     label = { Text("Register") }
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Summary,
                     onClick = { navigateTo(Routes.Summary) },
-                    icon = { Icon(Icons.Default.BarChart, "Summary") },
+                    icon = { Icon(Icons.Default.DateRange, "Summary") },
                     label = { Text("Summary") }
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.ImportStudents,
                     onClick = { navigateTo(Routes.ImportStudents) },
-                    icon = { Icon(Icons.Default.UploadFile, "Import") },
+                    icon = { Icon(Icons.Default.Add, "Import") },
                     label = { Text("Import") }
                 )
                 NavigationBarItem(
