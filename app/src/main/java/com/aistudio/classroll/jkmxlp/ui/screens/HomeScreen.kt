@@ -2,6 +2,8 @@ package com.aistudio.classroll.jkmxlp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,12 +25,46 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
     val currentYear by viewModel.currentYear.collectAsStateWithLifecycle()
     var currentIndex by remember { mutableStateOf(0) }
     val records = remember { mutableStateListOf<AttendanceRecordEntity>() }
-    val date = remember { SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()) }
+    var date by remember { mutableStateOf(SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())) }
+    var showDatePicker by remember { mutableStateOf(false) }
     var submissionMessage by remember { mutableStateOf("") }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = try {
+                SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(date)?.time
+            } catch (e: Exception) {
+                System.currentTimeMillis()
+            }
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let {
+                        date = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(it))
+                        currentIndex = 0
+                        records.clear()
+                        submissionMessage = ""
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 
     if (students.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No students found. Sync or Import first.")
+            Text("No students found. Import students first.")
         }
         return
     }
@@ -45,7 +81,7 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
             Button(onClick = { 
                 submissionMessage = "Submitting..."
                 viewModel.submitAttendance(date, records) { success ->
-                    submissionMessage = if (success) "Submitted and Synced!" else "Saved locally (Sync pending)."
+                    submissionMessage = if (success) "Saved successfully!" else "Failed to save."
                 }
             }) {
                 Text("Submit")
@@ -67,7 +103,12 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text("Attendance for $date", style = MaterialTheme.typography.titleLarge)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Attendance for $date", style = MaterialTheme.typography.titleLarge)
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Select Date")
+                    }
+                }
                 Text("${currentIndex + 1} / ${students.size}", style = MaterialTheme.typography.bodyLarge)
             }
             if (currentIndex > 0) {
