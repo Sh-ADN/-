@@ -80,12 +80,22 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
             Text("Absent: $absentCount", style = MaterialTheme.typography.bodyLarge)
             Spacer(Modifier.height(32.dp))
             Button(onClick = { 
-                submissionMessage = "Submitting..."
+                 submissionMessage = "Submitting..."
                 viewModel.submitAttendance(date, records) { success ->
                     submissionMessage = if (success) "Saved successfully!" else "Failed to save."
                 }
             }) {
                 Text("Submit")
+            }
+            if (currentIndex > 0) {
+                Spacer(Modifier.height(16.dp))
+                OutlinedButton(onClick = {
+                    if (currentIndex > 0) currentIndex--
+                    if (records.isNotEmpty()) records.removeLast()
+                    submissionMessage = ""
+                }) {
+                    Text("Undo Last")
+                }
             }
             if (submissionMessage.isNotEmpty()) {
                 Spacer(Modifier.height(16.dp))
@@ -115,8 +125,8 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
             }
             if (currentIndex > 0) {
                 TextButton(onClick = {
-                    currentIndex--
-                    records.removeLast()
+                    if (currentIndex > 0) currentIndex--
+                    if (records.isNotEmpty()) records.removeLast()
                 }) {
                     Text("Undo")
                 }
