@@ -30,23 +30,49 @@ private val LightColorScheme =
     */
   )
 
+private val ForestColorScheme = lightColorScheme(
+  primary = ForestPrimary,
+  secondary = ForestSecondary,
+  tertiary = ForestTertiary,
+  background = ForestBackground
+)
+
+private val OceanColorScheme = lightColorScheme(
+  primary = OceanPrimary,
+  secondary = OceanSecondary,
+  tertiary = OceanTertiary,
+  background = OceanBackground
+)
+
 @Composable
 fun MyApplicationTheme(
+  themeMode: String = "SYSTEM",
   darkTheme: Boolean = isSystemInDarkTheme(),
-  // Dynamic color is available on Android 12+
   dynamicColor: Boolean = true,
   content: @Composable () -> Unit,
 ) {
-  val colorScheme =
-    when {
-      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-        val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
+  val isDark = when (themeMode) {
+    "DARK" -> true
+    "LIGHT" -> false
+    else -> darkTheme
+  }
 
-      darkTheme -> DarkColorScheme
-      else -> LightColorScheme
+  val colorScheme = when (themeMode) {
+    "FOREST" -> ForestColorScheme
+    "OCEAN" -> OceanColorScheme
+    "DARK" -> DarkColorScheme
+    "LIGHT" -> LightColorScheme
+    else -> {
+      if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val context = LocalContext.current
+        if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+      } else if (isDark) {
+        DarkColorScheme
+      } else {
+        LightColorScheme
+      }
     }
+  }
 
   MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
 }

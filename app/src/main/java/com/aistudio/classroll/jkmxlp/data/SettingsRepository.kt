@@ -16,6 +16,11 @@ class SettingsRepository(private val context: Context) {
         val WEB_APP_URL = stringPreferencesKey("web_app_url")
         val ACADEMIC_YEAR = stringPreferencesKey("academic_year")
         val APPS_SCRIPT_TOKEN = stringPreferencesKey("apps_script_token")
+        val APP_THEME = stringPreferencesKey("app_theme")
+    }
+
+    val appThemeFlow: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[APP_THEME] ?: "SYSTEM"
     }
 
     val webAppUrlFlow: Flow<String> = context.dataStore.data.map {
@@ -45,6 +50,12 @@ class SettingsRepository(private val context: Context) {
     suspend fun updateAppsScriptToken(token: String) {
         context.dataStore.edit { preferences ->
             preferences[APPS_SCRIPT_TOKEN] = token
+        }
+    }
+
+    suspend fun updateAppTheme(theme: String) {
+        context.dataStore.edit { preferences ->
+            preferences[APP_THEME] = theme
         }
     }
 }

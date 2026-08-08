@@ -74,6 +74,33 @@ class ClassRollRepository(
         return true
     }
     
+    suspend fun clearAttendanceForYear(year: String) {
+        dao.clearAttendanceForYear(year)
+    }
+
+    suspend fun clearStudentsForYear(year: String) {
+        dao.clearStudentsForYear(year)
+    }
+
+    suspend fun getAllStudentsAllYears(): List<StudentEntity> {
+        return dao.getAllStudentsAllYears()
+    }
+
+    suspend fun getAllAttendanceAllYears(): List<AttendanceRecordEntity> {
+        return dao.getAllAttendanceAllYears()
+    }
+
+    suspend fun restoreBackupData(students: List<StudentEntity>, records: List<AttendanceRecordEntity>) {
+        dao.clearAllStudents()
+        dao.clearAllAttendance()
+        dao.insertStudents(students)
+        dao.insertAttendanceRecords(records)
+    }
+
+    suspend fun updateAppTheme(theme: String) {
+        settingsRepo.updateAppTheme(theme)
+    }
+
     suspend fun fetchYears(): List<String> {
         // Local only fallback, or could query DB
         return emptyList()

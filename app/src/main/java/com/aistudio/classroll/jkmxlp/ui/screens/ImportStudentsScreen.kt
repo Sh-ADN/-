@@ -9,7 +9,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aistudio.classroll.jkmxlp.data.RemoteStudent
@@ -22,8 +24,11 @@ fun ImportStudentsScreen(viewModel: ClassRollViewModel) {
     var previewStudents by remember { mutableStateOf(emptyList<RemoteStudent>()) }
     var statusMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
     val currentYear by viewModel.currentYear.collectAsStateWithLifecycle()
     
+    val sampleCsv = "Roll,Name\n1,John Doe\n2,Jane Smith\n3,Alex Johnson"
+
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
             try {
@@ -54,13 +59,38 @@ fun ImportStudentsScreen(viewModel: ClassRollViewModel) {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Button(onClick = { launcher.launch("*/*") }) {
-            Text("Select CSV File")
+        Text("Import Student Roster", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            "Select a CSV file containing Roll Number and Name in comma-separated format.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { launcher.launch("*/*") }) {
+                Text("Select CSV File")
+            }
+
+            OutlinedButton(onClick = {
+                clipboardManager.setText(AnnotatedString(sampleCsv))
+                statusMessage = "Sample CSV copied to clipboard!"
+            }) {
+                Text("Copy Sample CSV")
+            }
         }
-        Text(statusMessage, modifier = Modifier.padding(vertical = 8.dp))
+
+        if (statusMessage.isNotEmpty()) {
+            Text(statusMessage, modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.primary)
+        }
         
         if (previewStudents.isNotEmpty()) {
-            LazyColumn(modifier = Modifier.weight(1f)) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Preview (${previewStudents.size} students):", style = MaterialTheme.typography.titleMedium)
+            
+            LazyColumn(modifier = Modifier.weight(1f).padding(top = 8.dp)) {
                 items(previewStudents) { student ->
                     ListItem(
                         headlineContent = { Text(student.name) },
@@ -72,9 +102,9 @@ fun ImportStudentsScreen(viewModel: ClassRollViewModel) {
             Button(
                 onClick = { 
                     statusMessage = "Importing..."
-                        viewModel.importStudents(currentYear, previewStudents) { result ->
-                            statusMessage = if (result == "Success") "Import successful!" else "Import failed: $result"
-                        }
+                    viewModel.importStudents(currentYear, previewStudents) { result ->
+                        statusMessage = if (result == "Success") "Import successful!" else "Import failed: $result"
+                    }
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 enabled = currentYear.isNotBlank()

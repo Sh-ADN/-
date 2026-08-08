@@ -9,6 +9,9 @@ import com.aistudio.classroll.jkmxlp.ui.ClassRollApp
 import com.aistudio.classroll.jkmxlp.ui.ClassRollViewModel
 import com.aistudio.classroll.jkmxlp.ui.theme.MyApplicationTheme
 
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 class MainActivity : ComponentActivity() {
     private val viewModel: ClassRollViewModel by viewModels()
 
@@ -16,7 +19,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyApplicationTheme {
+            val themeMode by viewModel.appTheme.collectAsStateWithLifecycle()
+            MyApplicationTheme(themeMode = themeMode) {
                 ClassRollApp(viewModel = viewModel)
             }
         }

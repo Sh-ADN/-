@@ -133,7 +133,45 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
             }
         }
         
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(16.dp))
+        
+        // Progress bar
+        LinearProgressIndicator(
+            progress = { (currentIndex.toFloat() / activeStudents.size.toFloat()).coerceIn(0f, 1f) },
+            modifier = Modifier.fillMaxWidth().height(8.dp),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        // Quick Batch Actions
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            OutlinedButton(onClick = {
+                records.clear()
+                activeStudents.forEach { s ->
+                    records.add(AttendanceRecordEntity(currentYear, date, s.roll, "P", false))
+                }
+                currentIndex = activeStudents.size
+            }) {
+                Text("Mark All Present")
+            }
+            
+            OutlinedButton(onClick = {
+                records.clear()
+                activeStudents.forEach { s ->
+                    records.add(AttendanceRecordEntity(currentYear, date, s.roll, "A", false))
+                }
+                currentIndex = activeStudents.size
+            }) {
+                Text("Mark All Absent")
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
         
         key(currentStudent.roll) {
             SwipeableStudentCard(
@@ -147,6 +185,36 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
         }
         
         Spacer(Modifier.height(16.dp))
+
+        // Tap action buttons for Present/Absent
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Button(
+                onClick = {
+                    records.add(AttendanceRecordEntity(currentYear, date, currentStudent.roll, "P", false))
+                    currentIndex++
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                modifier = Modifier.weight(1f).height(50.dp).padding(end = 8.dp)
+            ) {
+                Text("Present (Swipe Right)", color = Color.White)
+            }
+
+            Button(
+                onClick = {
+                    records.add(AttendanceRecordEntity(currentYear, date, currentStudent.roll, "A", false))
+                    currentIndex++
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336)),
+                modifier = Modifier.weight(1f).height(50.dp).padding(start = 8.dp)
+            ) {
+                Text("Absent (Swipe Left)", color = Color.White)
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
     }
 }
 

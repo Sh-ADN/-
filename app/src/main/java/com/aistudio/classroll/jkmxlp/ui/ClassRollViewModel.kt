@@ -24,6 +24,9 @@ import java.util.Locale
 
 import kotlinx.coroutines.flow.flatMapLatest
 
+import org.json.JSONArray
+import org.json.JSONObject
+
 class ClassRollViewModel(application: Application) : AndroidViewModel(application) {
     private val db = Room.databaseBuilder(application, AppDatabase::class.java, "classroll_db").build()
     private val settingsRepo = SettingsRepository(application)
@@ -31,6 +34,7 @@ class ClassRollViewModel(application: Application) : AndroidViewModel(applicatio
 
     val webAppUrl = settingsRepo.webAppUrlFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "https://script.google.com/macros/s/AKfycbzTDiNJh4LEaIah19SVFaf6JlESbW5tf2ElwaMULTDENIAlXFOFI4QAXEmV1nYwrVdA/exec")
     val currentYear = settingsRepo.academicYearFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+    val appTheme = settingsRepo.appThemeFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "SYSTEM")
 
     private val _availableYears = MutableStateFlow<List<String>>(emptyList())
     val availableYears: StateFlow<List<String>> = _availableYears.asStateFlow()
@@ -41,6 +45,12 @@ class ClassRollViewModel(application: Application) : AndroidViewModel(applicatio
     fun updateSettings(year: String) {
         viewModelScope.launch {
             settingsRepo.updateAcademicYear(year)
+        }
+    }
+
+    fun updateTheme(themeMode: String) {
+        viewModelScope.launch {
+            repository.updateAppTheme(themeMode)
         }
     }
 
@@ -107,6 +117,107 @@ class ClassRollViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
     
+    fun clearAttendance() {
+        viewModelScope.launch {
+            val year = currentYear.value
+            if (year.isNotBlank()) {
+                repository.clearAttendanceForYear(year)
+            }
+        }
+    }
+
+    fun clearStudents() {
+        viewModelScope.launch {
+            val year = currentYear.value
+            if (year.isNotBlank()) {
+                repository.clearStudentsForYear(year)
+            }
+        }
+    }
+
+    fun exportBackupJson(onResult: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val students = repository.getAllStudentsAllYears()
+                val records = repository.getAllAttendanceAllYears()
+
+                val jsonRoot = JSONObject()
+                jsonRoot.put("version", 1)
+                jsonRoot.put("exportedAt", System.currentTimeMillis())
+
+                val studentsArray = JSONArray()
+                students.forEach { s ->
+                    val sObj = JSONObject()
+                    sObj.put("year", s.year)
+                    sObj.put("roll", s.roll)
+                    sObj.put("name", s.name)
+                    sObj.put("active", s.active)
+                    studentsArray.put(sObj)
+                }
+                jsonRoot.put("students", studentsArray)
+
+                val recordsArray = JSONArray()
+                records.forEach { r ->
+                    val rObj = JSONObject()
+                    rObj.put("year", r.year)
+                    rObj.put("date", r.date)
+                    rObj.put("roll", r.roll)
+                    rObj.put("status", r.status)
+                    recordsArray.put(rObj)
+                }
+                jsonRoot.put("attendanceRecords", recordsArray)
+
+                onResult(jsonRoot.toString(2))
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onResult("")
+            }
+        }
+    }
+
+    fun restoreBackupJson(jsonString: String, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val jsonRoot = JSONObject(jsonString)
+                val studentsArray = jsonRoot.getJSONArray("students")
+                val recordsArray = jsonRoot.getJSONArray("attendanceRecords")
+
+                val students = mutableListOf<StudentEntity>()
+                for (i in 0 until studentsArray.length()) {
+                    val sObj = studentsArray.getJSONObject(i)
+                    students.add(
+                        StudentEntity(
+                            year = sObj.getString("year"),
+                            roll = sObj.getString("roll"),
+                            name = sObj.optString("name", ""),
+                            active = sObj.optBoolean("active", true)
+                        )
+                    )
+                }
+
+                val records = mutableListOf<AttendanceRecordEntity>()
+                for (i in 0 until recordsArray.length()) {
+                    val rObj = recordsArray.getJSONObject(i)
+                    records.add(
+                        AttendanceRecordEntity(
+                            year = rObj.getString("year"),
+                            date = rObj.getString("date"),
+                            roll = rObj.getString("roll"),
+                            status = rObj.getString("status"),
+                            isSynced = true
+                        )
+                    )
+                }
+
+                repository.restoreBackupData(students, records)
+                onResult(true, "Restored ${students.size} students and ${records.size} attendance records successfully.")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onResult(false, "Failed to parse backup JSON: ${e.message}")
+            }
+        }
+    }
+
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val students: StateFlow<List<StudentEntity>> = currentYear
         .flatMapLatest { year ->
