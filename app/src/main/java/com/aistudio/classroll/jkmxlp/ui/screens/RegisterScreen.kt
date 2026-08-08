@@ -33,11 +33,57 @@ fun RegisterScreen(viewModel: ClassRollViewModel) {
     val attendanceRecordsFlow = remember(currentMonthStr, currentYear) { viewModel.getAttendanceForMonth(currentMonthStr) }
     val attendanceRecords by attendanceRecordsFlow.collectAsStateWithLifecycle()
     
-    if (students.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No students to display.")
-        }
-        return
+    var showStudentDialog by remember { mutableStateOf(false) }
+    var editingStudentRoll by remember { mutableStateOf("") }
+    var editingStudentName by remember { mutableStateOf("") }
+    
+    if (showStudentDialog) {
+        AlertDialog(
+            onDismissRequest = { showStudentDialog = false },
+            title = { Text(if (editingStudentRoll.isNotBlank() && students.any { it.roll == editingStudentRoll }) "Edit Student" else "Add Student") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = editingStudentRoll,
+                        onValueChange = { editingStudentRoll = it },
+                        label = { Text("Roll Number") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = editingStudentName,
+                        onValueChange = { editingStudentName = it },
+                        label = { Text("Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (editingStudentRoll.isNotBlank()) {
+                        viewModel.addOrUpdateStudent(editingStudentRoll, editingStudentName)
+                    }
+                    showStudentDialog = false
+                }) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                Row {
+                    if (editingStudentRoll.isNotBlank() && students.any { it.roll == editingStudentRoll }) {
+                        TextButton(onClick = {
+                            viewModel.deleteStudent(editingStudentRoll)
+                            showStudentDialog = false
+                        }) {
+                            Text("Delete", color = Color.Red)
+                        }
+                    }
+                    TextButton(onClick = { showStudentDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            }
+        )
     }
 
     // Get all dates in current month
@@ -51,67 +97,96 @@ fun RegisterScreen(viewModel: ClassRollViewModel) {
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
 
-    Column(Modifier.fillMaxSize()) {
-        Text("Register: $currentMonthStr", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))
-        
-        Row(Modifier.weight(1f)) {
-            // Left Sticky Column (Roll & Name)
-            Column(Modifier.width(120.dp).border(1.dp, Color.Gray)) {
-                // Header cell
-                Box(Modifier.height(48.dp).fillMaxWidth().background(Color.LightGray).border(1.dp, Color.Gray), contentAlignment = Alignment.Center) {
-                    Text("Roll / Name", style = MaterialTheme.typography.labelSmall)
-                }
-                // Names column
-                Column(Modifier.verticalScroll(verticalScrollState)) {
-                    students.forEach { student ->
-                        Box(Modifier.height(48.dp).fillMaxWidth().border(1.dp, Color.Gray).padding(4.dp), contentAlignment = Alignment.CenterStart) {
-                            Text("${student.roll} ${student.name}", maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                }
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = { 
+                editingStudentRoll = ""
+                editingStudentName = ""
+                showStudentDialog = true 
+            }) {
+                Text("+")
             }
-
-            // Grid (Dates & Attendance)
-            Column(Modifier.fillMaxWidth().horizontalScroll(horizontalScrollState)) {
-                // Header row (Dates)
-                Row(Modifier.height(48.dp).background(Color.LightGray)) {
-                    dates.forEach { date ->
-                        val dayStr = date.substringAfterLast("-")
-                        Box(Modifier.width(48.dp).fillMaxHeight().border(1.dp, Color.Gray), contentAlignment = Alignment.Center) {
-                            Text(dayStr, style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
+        }
+    ) { innerPadding ->
+        Column(Modifier.fillMaxSize().padding(innerPadding)) {
+            Text("Register: $currentMonthStr", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))
+            
+            if (students.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No students to display.")
                 }
-                // Attendance Cells
-                Column(Modifier.verticalScroll(verticalScrollState)) {
-                    students.forEach { student ->
-                        Row(Modifier.height(48.dp)) {
-                            dates.forEach { date ->
-                                val record = attendanceRecords.find { it.roll == student.roll && it.date == date }
-                                val status = record?.status ?: ""
-                                val cellColor = when (status) {
-                                    "P" -> Color(0xFFC8E6C9)
-                                    "A" -> Color(0xFFFFCDD2)
-                                    else -> Color.Transparent
-                                }
-                                
+            } else {
+                Row(Modifier.weight(1f)) {
+                    // Left Sticky Column (Roll & Name)
+                    Column(Modifier.width(120.dp).border(1.dp, Color.Gray)) {
+                        // Header cell
+                        Box(Modifier.height(48.dp).fillMaxWidth().background(Color.LightGray).border(1.dp, Color.Gray), contentAlignment = Alignment.Center) {
+                            Text("Roll / Name", style = MaterialTheme.typography.labelSmall)
+                        }
+                        // Names column
+                        Column(Modifier.verticalScroll(verticalScrollState)) {
+                            students.forEach { student ->
                                 Box(
                                     Modifier
-                                        .width(48.dp)
-                                        .fillMaxHeight()
-                                        .background(cellColor)
+                                        .height(48.dp)
+                                        .fillMaxWidth()
                                         .border(1.dp, Color.Gray)
+                                        .padding(4.dp)
                                         .clickable {
-                                            val nextStatus = when (status) {
-                                                "" -> "P"
-                                                "P" -> "A"
-                                                else -> ""
-                                            }
-                                            viewModel.updateCell(date, student.roll, nextStatus)
-                                        },
-                                    contentAlignment = Alignment.Center
+                                            editingStudentRoll = student.roll
+                                            editingStudentName = student.name
+                                            showStudentDialog = true
+                                        }, 
+                                    contentAlignment = Alignment.CenterStart
                                 ) {
-                                    Text(status, textAlign = TextAlign.Center)
+                                    Text("${student.roll} ${student.name}", maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+                    }
+                    // Grid (Dates & Attendance)
+                    Column(Modifier.fillMaxWidth().horizontalScroll(horizontalScrollState)) {
+                        // Header row (Dates)
+                        Row(Modifier.height(48.dp).background(Color.LightGray)) {
+                            dates.forEach { date ->
+                                val dayStr = date.substringAfterLast("-")
+                                Box(Modifier.width(48.dp).fillMaxHeight().border(1.dp, Color.Gray), contentAlignment = Alignment.Center) {
+                                    Text(dayStr, style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
+                        // Attendance Cells
+                        Column(Modifier.verticalScroll(verticalScrollState)) {
+                            students.forEach { student ->
+                                Row(Modifier.height(48.dp)) {
+                                    dates.forEach { date ->
+                                        val record = attendanceRecords.find { it.roll == student.roll && it.date == date }
+                                        val status = record?.status ?: ""
+                                        val cellColor = when (status) {
+                                            "P" -> Color(0xFFC8E6C9)
+                                            "A" -> Color(0xFFFFCDD2)
+                                            else -> Color.Transparent
+                                        }
+                                        
+                                        Box(
+                                            Modifier
+                                                .width(48.dp)
+                                                .fillMaxHeight()
+                                                .background(cellColor)
+                                                .border(1.dp, Color.Gray)
+                                                .clickable {
+                                                    val nextStatus = when (status) {
+                                                        "" -> "P"
+                                                        "P" -> "A"
+                                                        else -> ""
+                                                    }
+                                                    viewModel.updateCell(date, student.roll, nextStatus)
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(status, textAlign = TextAlign.Center)
+                                        }
+                                    }
                                 }
                             }
                         }

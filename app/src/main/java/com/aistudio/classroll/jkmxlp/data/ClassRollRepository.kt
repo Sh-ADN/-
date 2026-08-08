@@ -31,7 +31,17 @@ class ClassRollRepository(
 
     suspend fun importStudents(year: String, students: List<RemoteStudent>): String {
         return try {
-            val entities = students.map {
+            val maxRoll = students.maxOfOrNull { it.roll.toIntOrNull() ?: 0 } ?: 0
+            val importedRolls = students.mapNotNull { it.roll.toIntOrNull() }.toSet()
+            
+            val allStudents = students.toMutableList()
+            for (i in 1..maxRoll) {
+                if (i !in importedRolls) {
+                    allStudents.add(RemoteStudent(roll = i.toString(), name = "", active = true))
+                }
+            }
+
+            val entities = allStudents.map {
                 StudentEntity(year = year, roll = it.roll, name = it.name, active = it.active)
             }
             dao.insertStudents(entities)
@@ -47,6 +57,14 @@ class ClassRollRepository(
         // Save locally 
         dao.insertAttendanceRecords(records)
         return true
+    }
+
+    suspend fun addOrUpdateStudent(year: String, roll: String, name: String) {
+        dao.insertStudents(listOf(StudentEntity(year = year, roll = roll, name = name, active = true)))
+    }
+
+    suspend fun deleteStudent(year: String, roll: String) {
+        dao.deleteStudent(year, roll)
     }
 
     // Update single cell (from Register screen)

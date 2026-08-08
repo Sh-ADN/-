@@ -22,6 +22,7 @@ import java.util.Locale
 @Composable
 fun HomeScreen(viewModel: ClassRollViewModel) {
     val students by viewModel.students.collectAsStateWithLifecycle()
+    val activeStudents = remember(students) { students.filter { it.name.isNotBlank() } }
     val currentYear by viewModel.currentYear.collectAsStateWithLifecycle()
     var currentIndex by remember { mutableStateOf(0) }
     val records = remember { mutableStateListOf<AttendanceRecordEntity>() }
@@ -62,14 +63,14 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
         }
     }
 
-    if (students.isEmpty()) {
+    if (activeStudents.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No students found. Import students first.")
         }
         return
     }
 
-    if (currentIndex >= students.size) {
+    if (currentIndex >= activeStudents.size) {
         val presentCount = records.count { it.status == "P" }
         val absentCount = records.count { it.status == "A" }
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -94,8 +95,8 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
         return
     }
 
-    val currentStudent = students[currentIndex]
-    
+    val currentStudent = activeStudents[currentIndex]
+
     Column(Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -104,12 +105,13 @@ fun HomeScreen(viewModel: ClassRollViewModel) {
         ) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Attendance for $date", style = MaterialTheme.typography.titleLarge)
+                    val displayDate = remember(date) { formatDisplayDate(date) }
+                    Text("Attendance for $displayDate", style = MaterialTheme.typography.titleLarge)
                     IconButton(onClick = { showDatePicker = true }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Select Date")
                     }
                 }
-                Text("${currentIndex + 1} / ${students.size}", style = MaterialTheme.typography.bodyLarge)
+                Text("${currentIndex + 1} / ${activeStudents.size}", style = MaterialTheme.typography.bodyLarge)
             }
             if (currentIndex > 0) {
                 TextButton(onClick = {
@@ -196,5 +198,23 @@ private fun SwipeableStudentCard(
                 Text(student.name, style = MaterialTheme.typography.headlineMedium)
             }
         }
+    }
+}
+
+private fun formatDisplayDate(dateString: String): String {
+    return try {
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(dateString) ?: return dateString
+        val day = SimpleDateFormat("d", Locale.US).format(date).toInt()
+        val suffix = when {
+            day in 11..13 -> "th"
+            day % 10 == 1 -> "st"
+            day % 10 == 2 -> "nd"
+            day % 10 == 3 -> "rd"
+            else -> "th"
+        }
+        val monthYear = SimpleDateFormat("MMMM, yyyy", Locale.US).format(date)
+        "${day}${suffix} $monthYear"
+    } catch (e: Exception) {
+        dateString
     }
 }

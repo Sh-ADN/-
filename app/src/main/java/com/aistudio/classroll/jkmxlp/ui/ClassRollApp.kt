@@ -18,36 +18,46 @@ fun ClassRollApp(viewModel: ClassRollViewModel) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route ?: Routes.Home
 
+    val navigateTo = { route: String ->
+        navController.navigate(route) {
+            popUpTo(Routes.Home) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     Scaffold(
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
                     selected = currentRoute == Routes.Home,
-                    onClick = { navController.navigate(Routes.Home) },
+                    onClick = { navigateTo(Routes.Home) },
                     icon = { Icon(Icons.Default.Checklist, "Take Attendance") },
                     label = { Text("Home") }
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Register,
-                    onClick = { navController.navigate(Routes.Register) },
+                    onClick = { navigateTo(Routes.Register) },
                     icon = { Icon(Icons.Default.GridOn, "Register") },
                     label = { Text("Register") }
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Summary,
-                    onClick = { navController.navigate(Routes.Summary) },
+                    onClick = { navigateTo(Routes.Summary) },
                     icon = { Icon(Icons.Default.BarChart, "Summary") },
                     label = { Text("Summary") }
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.ImportStudents,
-                    onClick = { navController.navigate(Routes.ImportStudents) },
+                    onClick = { navigateTo(Routes.ImportStudents) },
                     icon = { Icon(Icons.Default.UploadFile, "Import") },
                     label = { Text("Import") }
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Settings,
-                    onClick = { navController.navigate(Routes.Settings) },
+                    onClick = { navigateTo(Routes.Settings) },
                     icon = { Icon(Icons.Default.Settings, "Settings") },
                     label = { Text("Settings") }
                 )

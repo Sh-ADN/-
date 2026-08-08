@@ -88,6 +88,24 @@ class ClassRollViewModel(application: Application) : AndroidViewModel(applicatio
             repository.updateAttendanceCell(year, date, roll, status)
         }
     }
+
+    fun addOrUpdateStudent(roll: String, name: String) {
+        viewModelScope.launch {
+            val year = currentYear.value
+            if (year.isNotBlank()) {
+                repository.addOrUpdateStudent(year, roll, name)
+            }
+        }
+    }
+
+    fun deleteStudent(roll: String) {
+        viewModelScope.launch {
+            val year = currentYear.value
+            if (year.isNotBlank()) {
+                repository.deleteStudent(year, roll)
+            }
+        }
+    }
     
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val students: StateFlow<List<StudentEntity>> = currentYear
